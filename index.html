@@ -1,0 +1,1724 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GeoServices | Conectando Profissionais aos Clientes</title>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Sora:wght@600;700;800&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --primary: #2563eb;
+    --primary-dark: #1d4ed8;
+    --primary-light: #60a5fa;
+    --accent: #f59e0b;
+    --dark: #0f172a;
+    --gray-900: #1e293b;
+    --gray-700: #334155;
+    --gray-500: #64748b;
+    --gray-100: #f1f5f9;
+    --white: #ffffff;
+    --gradient-primary: linear-gradient(135deg, #2563eb 0%, #3b82f6 100%);
+    --gradient-hero: linear-gradient(135deg, rgba(37, 99, 235, 0.05) 0%, rgba(59, 130, 246, 0.02) 100%);
+    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+    --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+    --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    --shadow-primary: 0 10px 30px rgba(37, 99, 235, 0.2);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--white);
+    color: var(--gray-700);
+    line-height: 1.6;
+    overflow-x: hidden;
+}
+
+/* ============================================
+   ANIMAÇÕES AVANÇADAS
+============================================ */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInDown {
+    from {
+        opacity: 0;
+        transform: translateY(-40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes fadeInRight {
+    from {
+        opacity: 0;
+        transform: translateX(40px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes scaleIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@keyframes float {
+    0%, 100% {
+        transform: translateY(0px);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.05);
+        opacity: 0.8;
+    }
+}
+
+@keyframes slideShow {
+    0%, 100% {
+        transform: translateX(0);
+    }
+    25% {
+        transform: translateX(-5px);
+    }
+    75% {
+        transform: translateX(5px);
+    }
+}
+
+@keyframes kenBurns {
+    0% {
+        transform: scale(1) translate(0, 0);
+    }
+    100% {
+        transform: scale(1.1) translate(-20px, -10px);
+    }
+}
+
+.reveal {
+    opacity: 0;
+    transform: translateY(40px);
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal.active {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.reveal-left {
+    opacity: 0;
+    transform: translateX(-40px);
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal-left.active {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.reveal-right {
+    opacity: 0;
+    transform: translateX(40px);
+    transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.reveal-right.active {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+/* ============================================
+   HEADER & NAVEGAÇÃO PROFISSIONAL
+============================================ */
+header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
+    background: rgba(255, 255, 255, 0.98);
+    backdrop-filter: blur(20px) saturate(180%);
+    border-bottom: 1px solid rgba(37, 99, 235, 0.08);
+    box-shadow: 0 2px 20px rgba(0, 0, 0, 0.04);
+    transition: all 0.3s ease;
+}
+
+header.scrolled {
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.08);
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 1rem 5%;
+}
+
+.logo {
+    font-family: 'Sora', sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+    color: var(--dark);
+    letter-spacing: -1px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.3s ease;
+}
+
+.logo:hover {
+    transform: translateY(-2px);
+}
+
+.logo i {
+    color: var(--primary);
+    font-size: 32px;
+    animation: pulse 2s infinite;
+}
+
+.logo-text {
+    color: var(--dark);
+}
+
+.logo-text span {
+    color: var(--primary);
+}
+
+.nav-menu {
+    display: flex;
+    list-style: none;
+    gap: 3rem;
+    align-items: center;
+}
+
+.nav-menu li {
+    position: relative;
+}
+
+.nav-menu a {
+    text-decoration: none;
+    color: var(--gray-700);
+    font-weight: 600;
+    font-size: 15px;
+    transition: all 0.3s ease;
+    padding: 8px 0;
+    position: relative;
+}
+
+.nav-menu a::before {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 0;
+    height: 3px;
+    background: var(--gradient-primary);
+    border-radius: 2px;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.nav-menu a:hover {
+    color: var(--primary);
+}
+
+.nav-menu a:hover::before {
+    width: 100%;
+}
+
+.nav-menu a.active {
+    color: var(--primary);
+}
+
+.nav-menu a.active::before {
+    width: 100%;
+}
+
+.nav-cta {
+    background: var(--gradient-primary);
+    color: var(--white) !important;
+    padding: 12px 28px !important;
+    border-radius: 50px;
+    font-weight: 600;
+    box-shadow: var(--shadow-primary);
+    transition: all 0.3s ease;
+}
+
+.nav-cta::before {
+    display: none;
+}
+
+.nav-cta:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 35px rgba(37, 99, 235, 0.3);
+}
+
+.mobile-menu-toggle {
+    display: none;
+    background: none;
+    border: none;
+    font-size: 24px;
+    color: var(--dark);
+    cursor: pointer;
+}
+
+/* ============================================
+   HERO SECTION - FULLSCREEN SLIDER
+============================================ */
+#hero {
+    position: relative;
+    height: 100vh;
+    min-height: 700px;
+    overflow: hidden;
+    margin-top: 0;
+    padding: 0;
+}
+
+.hero-slider {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+    transition: opacity 1.2s cubic-bezier(0.4, 0, 0.2, 1);
+    z-index: 1;
+}
+
+.slide.active {
+    opacity: 1;
+    z-index: 2;
+}
+
+.slide-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+.slide.active .slide-background {
+    animation: kenBurns 15s ease-out infinite alternate;
+}
+
+.slide-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(
+        135deg,
+        rgba(15, 23, 42, 0.85) 0%,
+        rgba(37, 99, 235, 0.75) 100%
+    );
+    z-index: 1;
+}
+
+.slide-content {
+    position: relative;
+    z-index: 2;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 5%;
+    color: var(--white);
+}
+
+.slide-content h1 {
+    font-family: 'Sora', sans-serif;
+    font-size: clamp(3rem, 7vw, 5.5rem);
+    font-weight: 800;
+    line-height: 1.1;
+    margin-bottom: 1.5rem;
+    text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    letter-spacing: -2px;
+}
+
+.slide-content h1 span {
+    background: linear-gradient(135deg, #60a5fa 0%, #f59e0b 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+.slide-content p {
+    font-size: clamp(1.15rem, 2vw, 1.35rem);
+    margin-bottom: 2.5rem;
+    max-width: 650px;
+    opacity: 0.95;
+    line-height: 1.7;
+    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    font-weight: 400;
+}
+
+.hero-cta-group {
+    display: flex;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+}
+
+.cta-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    padding: 18px 38px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 50px;
+    text-decoration: none;
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+}
+
+.cta-primary {
+    background: linear-gradient(135deg, #f59e0b 0%, #fb923c 100%);
+    color: var(--white);
+}
+
+.cta-primary:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 15px 40px rgba(245, 158, 11, 0.4);
+}
+
+.cta-secondary {
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--white);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+}
+
+.cta-secondary:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: translateY(-4px);
+    box-shadow: 0 15px 40px rgba(255, 255, 255, 0.2);
+}
+
+/* Controles do Slider */
+.slider-controls {
+    position: absolute;
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex;
+    gap: 15px;
+}
+
+.slider-dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.4);
+    border: 2px solid rgba(255, 255, 255, 0.6);
+    cursor: pointer;
+    transition: all 0.4s ease;
+}
+
+.slider-dot:hover {
+    background: rgba(255, 255, 255, 0.6);
+    transform: scale(1.2);
+}
+
+.slider-dot.active {
+    background: var(--white);
+    width: 40px;
+    border-radius: 10px;
+}
+
+.slider-arrows {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    display: flex;
+    justify-content: space-between;
+    padding: 0 3%;
+    z-index: 10;
+    pointer-events: none;
+}
+
+.slider-arrow {
+    pointer-events: all;
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+    color: var(--white);
+    font-size: 20px;
+    cursor: pointer;
+    transition: all 0.4s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.slider-arrow:hover {
+    background: rgba(255, 255, 255, 0.25);
+    border-color: rgba(255, 255, 255, 0.5);
+    transform: scale(1.1);
+}
+
+/* ============================================
+   SOBRE NÓS - FULLSCREEN SLIDER
+============================================ */
+#sobre {
+    padding: 0;
+    margin: 0;
+    background: var(--white);
+    position: relative;
+}
+
+.about-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    min-height: 100vh;
+}
+
+.about-content {
+    padding: 8% 6%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+}
+
+.about-content h2 {
+    font-family: 'Sora', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    font-weight: 800;
+    color: var(--dark);
+    margin-bottom: 1.5rem;
+    letter-spacing: -1px;
+}
+
+.about-content h2 span {
+    color: var(--primary);
+}
+
+.about-content p {
+    font-size: 1.15rem;
+    line-height: 1.8;
+    color: var(--gray-700);
+    margin-bottom: 2rem;
+}
+
+.about-features {
+    display: grid;
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.about-feature {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: var(--white);
+    border-radius: 16px;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s ease;
+}
+
+.about-feature:hover {
+    transform: translateY(-5px);
+    box-shadow: var(--shadow-xl);
+}
+
+.about-feature i {
+    font-size: 28px;
+    color: var(--primary);
+    min-width: 40px;
+}
+
+.about-feature-content h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+}
+
+.about-feature-content p {
+    font-size: 1rem;
+    margin: 0;
+}
+
+.about-slider-wrapper {
+    position: relative;
+    overflow: hidden;
+    background: var(--gray-900);
+}
+
+.about-slider {
+    position: relative;
+    width: 100%;
+    height: 100%;
+}
+
+.about-slider .slide {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.about-slider .slide-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-size: cover;
+    background-position: center;
+}
+
+.about-slider .slide.active .slide-background {
+    animation: kenBurns 12s ease-out infinite alternate;
+}
+
+.about-slider .slide-overlay {
+    background: linear-gradient(
+        90deg,
+        rgba(15, 23, 42, 0.3) 0%,
+        rgba(37, 99, 235, 0.2) 100%
+    );
+}
+
+/* ============================================
+   SERVIÇOS
+============================================ */
+#servicos {
+    padding: 8% 5%;
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+}
+
+#servicos h2 {
+    font-family: 'Sora', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    font-weight: 800;
+    text-align: center;
+    color: var(--dark);
+    margin-bottom: 1rem;
+    letter-spacing: -1px;
+}
+
+#servicos h2 span {
+    color: var(--primary);
+}
+
+#servicos > p {
+    text-align: center;
+    font-size: 1.2rem;
+    color: var(--gray-500);
+    margin-bottom: 5rem;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.services-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 2.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.service-card {
+    background: var(--white);
+    padding: 3rem 2rem;
+    border-radius: 20px;
+    box-shadow: var(--shadow-lg);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    text-align: center;
+    border: 1px solid rgba(37, 99, 235, 0.05);
+}
+
+.service-card:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--shadow-xl);
+    border-color: rgba(37, 99, 235, 0.15);
+}
+
+.service-icon {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto 2rem;
+    background: var(--gradient-primary);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 36px;
+    color: var(--white);
+    box-shadow: var(--shadow-primary);
+    transition: all 0.4s ease;
+}
+
+.service-card:hover .service-icon {
+    transform: scale(1.1) rotate(5deg);
+}
+
+.service-card h3 {
+    font-family: 'Sora', sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 1rem;
+}
+
+.service-card p {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--gray-500);
+}
+
+/* ============================================
+   DEPOIMENTOS
+============================================ */
+#depoimentos {
+    padding: 8% 5%;
+    background: var(--white);
+}
+
+#depoimentos h2 {
+    font-family: 'Sora', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    font-weight: 800;
+    text-align: center;
+    color: var(--dark);
+    margin-bottom: 1rem;
+    letter-spacing: -1px;
+}
+
+#depoimentos h2 span {
+    color: var(--primary);
+}
+
+#depoimentos > p {
+    text-align: center;
+    font-size: 1.2rem;
+    color: var(--gray-500);
+    margin-bottom: 5rem;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.testimonials-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2.5rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.testimonial-card {
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+    padding: 3rem;
+    border-radius: 20px;
+    box-shadow: var(--shadow-md);
+    transition: all 0.4s ease;
+    border: 1px solid rgba(37, 99, 235, 0.08);
+}
+
+.testimonial-card:hover {
+    transform: translateY(-10px);
+    box-shadow: var(--shadow-xl);
+    border-color: rgba(37, 99, 235, 0.2);
+}
+
+.testimonial-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.testimonial-avatar {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    background: var(--gradient-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    color: var(--white);
+    font-weight: 700;
+    box-shadow: var(--shadow-primary);
+}
+
+.testimonial-info h4 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 0.25rem;
+}
+
+.testimonial-info p {
+    color: var(--gray-500);
+    font-size: 0.95rem;
+}
+
+.testimonial-rating {
+    display: flex;
+    gap: 0.25rem;
+    margin-bottom: 1.5rem;
+}
+
+.testimonial-rating i {
+    color: var(--accent);
+    font-size: 18px;
+}
+
+.testimonial-text {
+    font-size: 1.05rem;
+    line-height: 1.7;
+    color: var(--gray-700);
+    font-style: italic;
+}
+
+/* ============================================
+   CONTATO
+============================================ */
+#contato {
+    padding: 8% 5%;
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+}
+
+#contato h2 {
+    font-family: 'Sora', sans-serif;
+    font-size: clamp(2.5rem, 5vw, 3.5rem);
+    font-weight: 800;
+    text-align: center;
+    color: var(--dark);
+    margin-bottom: 1rem;
+    letter-spacing: -1px;
+}
+
+#contato > p {
+    text-align: center;
+    font-size: 1.2rem;
+    color: var(--gray-500);
+    margin-bottom: 5rem;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.contact-container {
+    display: grid;
+    grid-template-columns: 1fr 1.2fr;
+    gap: 4rem;
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.contact-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.contact-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    padding: 2rem;
+    background: var(--white);
+    border-radius: 16px;
+    box-shadow: var(--shadow-md);
+    transition: all 0.3s ease;
+}
+
+.contact-item:hover {
+    transform: translateX(10px);
+    box-shadow: var(--shadow-lg);
+}
+
+.contact-icon {
+    width: 60px;
+    height: 60px;
+    background: var(--gradient-primary);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    color: var(--white);
+    flex-shrink: 0;
+}
+
+.contact-details h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--dark);
+    margin-bottom: 0.5rem;
+}
+
+.contact-details p {
+    color: var(--gray-500);
+    line-height: 1.7;
+}
+
+.contact-details a {
+    color: var(--primary);
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.contact-details a:hover {
+    color: var(--primary-dark);
+    text-decoration: underline;
+}
+
+.map-wrapper {
+    border-radius: 20px;
+    overflow: hidden;
+    box-shadow: var(--shadow-xl);
+    height: 500px;
+}
+
+.map-wrapper iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+}
+
+/* ============================================
+   FOOTER
+============================================ */
+footer {
+    background: var(--dark);
+    padding: 4rem 5%;
+    text-align: center;
+}
+
+.footer-content {
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+.footer-logo {
+    font-family: 'Sora', sans-serif;
+    font-size: 32px;
+    font-weight: 800;
+    color: var(--white);
+    margin-bottom: 1.5rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.footer-logo i {
+    color: var(--primary);
+    font-size: 36px;
+}
+
+.footer-logo span {
+    color: var(--primary);
+}
+
+footer p {
+    color: var(--gray-500);
+    font-size: 1rem;
+    margin-bottom: 2rem;
+}
+
+.social-links {
+    display: flex;
+    gap: 1.5rem;
+    justify-content: center;
+}
+
+.social-links a {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--white);
+    font-size: 20px;
+    transition: all 0.3s ease;
+}
+
+.social-links a:hover {
+    background: var(--primary);
+    transform: translateY(-5px);
+}
+
+/* ============================================
+   RESPONSIVIDADE
+============================================ */
+@media (max-width: 1024px) {
+    .about-container {
+        grid-template-columns: 1fr;
+    }
+    
+    .about-slider-wrapper {
+        min-height: 500px;
+    }
+    
+    .contact-container {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .nav-menu {
+        position: fixed;
+        top: 80px;
+        left: -100%;
+        width: 100%;
+        height: calc(100vh - 80px);
+        background: rgba(255, 255, 255, 0.98);
+        backdrop-filter: blur(20px);
+        flex-direction: column;
+        justify-content: flex-start;
+        padding: 3rem 2rem;
+        gap: 2rem;
+        transition: left 0.4s ease;
+        box-shadow: var(--shadow-xl);
+    }
+    
+    .nav-menu.active {
+        left: 0;
+    }
+    
+    .mobile-menu-toggle {
+        display: block;
+    }
+    
+    #hero {
+        min-height: 600px;
+    }
+    
+    .hero-cta-group {
+        flex-direction: column;
+    }
+    
+    .cta-button {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .slider-arrows {
+        display: none;
+    }
+    
+    .services-grid,
+    .testimonials-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .slide-content h1 {
+        font-size: 2.5rem;
+    }
+    
+    .slider-controls {
+        bottom: 30px;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ============================================
+     HEADER
+============================================ -->
+<header>
+    <nav>
+        <div class="logo">
+            <i class="fa-solid fa-location-dot"></i>
+            <span class="logo-text">Geo<span>Services</span></span>
+        </div>
+        
+        <ul class="nav-menu">
+            <li><a href="#hero" class="active">Início</a></li>
+            <li><a href="#sobre">Sobre</a></li>
+            <li><a href="#servicos">Serviços</a></li>
+            <li><a href="#depoimentos">Depoimentos</a></li>
+            <li><a href="#contato" class="nav-cta">Contactar</a></li>
+        </ul>
+        
+        <button class="mobile-menu-toggle" aria-label="Menu">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </nav>
+</header>
+
+<!-- ============================================
+     HERO SECTION - FULLSCREEN SLIDER
+============================================ -->
+<section id="hero">
+    <div class="hero-slider" id="heroSlider">
+        <!-- Slide 1 -->
+        <div class="slide active">
+            <div class="slide-background" style="background-image: url('https://images.unsplash.com/photo-1553877522-43269d4ea984?q=80&w=2070&auto=format&fit=crop');"></div>
+            <div class="slide-overlay"></div>
+            <div class="slide-content">
+                <h1>Encontre <span>Profissionais</span><br>de Confiança</h1>
+                <p>Conectamos você aos melhores profissionais de Angola. Qualidade garantida, serviços verificados e avaliações reais.</p>
+                <div class="hero-cta-group">
+                    <a href="https://play.google.com/store" target="_blank" class="cta-button cta-primary">
+                        <i class="fa-brands fa-google-play"></i>
+                        Iniciar Experiência
+                    </a>
+                    <a href="login.html" class="cta-button cta-secondary">
+                        <i class="fa-solid fa-globe"></i>
+                        Versão Web
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 2 -->
+        <div class="slide">
+            <div class="slide-background" style="background-image: url('https://images.unsplash.com/photo-1556761175-5973dc0f32e7?q=80&w=2070&auto=format&fit=crop');"></div>
+            <div class="slide-overlay"></div>
+            <div class="slide-content">
+                <h1>Profissionais <span>Qualificados</span><br>ao Seu Alcance</h1>
+                <p>Mais de 500 profissionais verificados prontos para atender suas necessidades com excelência e profissionalismo.</p>
+                <div class="hero-cta-group">
+                    <a href="https://play.google.com/store" target="_blank" class="cta-button cta-primary">
+                        <i class="fa-brands fa-google-play"></i>
+                        Baixar Aplicativo
+                    </a>
+                    <a href="login.html" class="cta-button cta-secondary">
+                        <i class="fa-solid fa-right-to-bracket"></i>
+                        Aceder Plataforma
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Slide 3 -->
+        <div class="slide">
+            <div class="slide-background" style="background-image: url('https://images.unsplash.com/photo-1497366216548-37526070297c?q=80&w=2069&auto=format&fit=crop');"></div>
+            <div class="slide-overlay"></div>
+            <div class="slide-content">
+                <h1>Sua <span>Solução</span><br>Está Aqui</h1>
+                <p>Electricistas, canalizadores, pintores, carpinteiros e muito mais. Encontre o profissional ideal em minutos.</p>
+                <div class="hero-cta-group">
+                    <a href="https://play.google.com/store" target="_blank" class="cta-button cta-primary">
+                        <i class="fa-brands fa-google-play"></i>
+                        Começar Agora
+                    </a>
+                    <a href="login.html" class="cta-button cta-secondary">
+                        <i class="fa-solid fa-desktop"></i>
+                        Usar Versão Web
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Controles do Slider -->
+    <div class="slider-controls">
+        <span class="slider-dot active" onclick="goToSlide('heroSlider', 0)"></span>
+        <span class="slider-dot" onclick="goToSlide('heroSlider', 1)"></span>
+        <span class="slider-dot" onclick="goToSlide('heroSlider', 2)"></span>
+    </div>
+    
+    <div class="slider-arrows">
+        <button class="slider-arrow" onclick="changeSlide('heroSlider', -1)" aria-label="Anterior">
+            <i class="fa-solid fa-chevron-left"></i>
+        </button>
+        <button class="slider-arrow" onclick="changeSlide('heroSlider', 1)" aria-label="Próximo">
+            <i class="fa-solid fa-chevron-right"></i>
+        </button>
+    </div>
+</section>
+
+<!-- ============================================
+     SOBRE NÓS - FULLSCREEN SLIDER
+============================================ -->
+<section id="sobre">
+    <div class="about-container">
+        <div class="about-content reveal-left">
+            <h2>Sobre a <span>GeoServices</span></h2>
+            <p>Somos a plataforma líder em Angola que conecta clientes a profissionais qualificados. Nossa missão é facilitar o acesso a serviços de qualidade através de tecnologia inovadora e verificação rigorosa.</p>
+            
+            <div class="about-features">
+                <div class="about-feature">
+                    <i class="fa-solid fa-shield-halved"></i>
+                    <div class="about-feature-content">
+                        <h3>Profissionais Verificados</h3>
+                        <p>Todos os nossos profissionais passam por um processo rigoroso de verificação e validação de competências.</p>
+                    </div>
+                </div>
+                
+                <div class="about-feature">
+                    <i class="fa-solid fa-star"></i>
+                    <div class="about-feature-content">
+                        <h3>Avaliações Reais</h3>
+                        <p>Sistema transparente de avaliações permite escolher profissionais com base em experiências reais de outros clientes.</p>
+                    </div>
+                </div>
+                
+                <div class="about-feature">
+                    <i class="fa-solid fa-headset"></i>
+                    <div class="about-feature-content">
+                        <h3>Suporte Dedicado</h3>
+                        <p>Nossa equipe está sempre disponível para garantir a melhor experiência para clientes e profissionais.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="about-slider-wrapper reveal-right">
+            <div class="about-slider" id="aboutSlider">
+                <!-- Slide 1 -->
+                <div class="slide active">
+                    <div class="slide-background" style="background-image: url('https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop');"></div>
+                    <div class="slide-overlay"></div>
+                </div>
+                
+                <!-- Slide 2 -->
+                <div class="slide">
+                    <div class="slide-background" style="background-image: url('https://images.unsplash.com/photo-1600880292089-90a7e086ee0c?q=80&w=2070&auto=format&fit=crop');"></div>
+                    <div class="slide-overlay"></div>
+                </div>
+                
+                <!-- Slide 3 -->
+                <div class="slide">
+                    <div class="slide-background" style="background-image: url('https://images.unsplash.com/photo-1531482615713-2afd69097998?q=80&w=2070&auto=format&fit=crop');"></div>
+                    <div class="slide-overlay"></div>
+                </div>
+            </div>
+            
+            <div class="slider-controls">
+                <span class="slider-dot active" onclick="goToSlide('aboutSlider', 0)"></span>
+                <span class="slider-dot" onclick="goToSlide('aboutSlider', 1)"></span>
+                <span class="slider-dot" onclick="goToSlide('aboutSlider', 2)"></span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     SERVIÇOS
+============================================ -->
+<section id="servicos">
+    <h2 class="reveal">Nossos <span>Serviços</span></h2>
+    <p class="reveal">Ampla variedade de serviços profissionais</p>
+    
+    <div class="services-grid">
+        <div class="service-card reveal">
+            <div class="service-icon">
+                <i class="fa-solid fa-bolt"></i>
+            </div>
+            <h3>Electricidade</h3>
+            <p>Instalações, reparos e manutenção eléctrica com profissionais certificados e experientes.</p>
+        </div>
+        
+        <div class="service-card reveal">
+            <div class="service-icon">
+                <i class="fa-solid fa-droplet"></i>
+            </div>
+            <h3>Canalização</h3>
+            <p>Serviços completos de canalização, desde reparos simples até instalações complexas.</p>
+        </div>
+        
+        <div class="service-card reveal">
+            <div class="service-icon">
+                <i class="fa-solid fa-paint-roller"></i>
+            </div>
+            <h3>Pintura</h3>
+            <p>Pintores profissionais para transformar seus espaços com acabamento impecável.</p>
+        </div>
+        
+        <div class="service-card reveal">
+            <div class="service-icon">
+                <i class="fa-solid fa-hammer"></i>
+            </div>
+            <h3>Carpintaria</h3>
+            <p>Móveis sob medida, reparos e trabalhos em madeira com alta qualidade.</p>
+        </div>
+        
+        <div class="service-card reveal">
+            <div class="service-icon">
+                <i class="fa-solid fa-house"></i>
+            </div>
+            <h3>Construção Civil</h3>
+            <p>Profissionais qualificados para projetos de construção e renovação.</p>
+        </div>
+        
+        <div class="service-card reveal">
+            <div class="service-icon">
+                <i class="fa-solid fa-leaf"></i>
+            </div>
+            <h3>Jardinagem</h3>
+            <p>Cuidado profissional para manter seus jardins e espaços verdes impecáveis.</p>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     DEPOIMENTOS
+============================================ -->
+<section id="depoimentos">
+    <h2 class="reveal">O Que Dizem Nossos <span>Clientes</span></h2>
+    <p class="reveal">Experiências reais de quem confia na GeoServices</p>
+    
+    <div class="testimonials-grid">
+        <div class="testimonial-card reveal">
+            <div class="testimonial-header">
+                <div class="testimonial-avatar">AM</div>
+                <div class="testimonial-info">
+                    <h4>Ana Maria</h4>
+                    <p>Luanda, Angola</p>
+                </div>
+            </div>
+            <div class="testimonial-rating">
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+            </div>
+            <p class="testimonial-text">"Encontrei um electricista excelente através da plataforma. Serviço rápido, profissional e com preço justo. Recomendo!"</p>
+        </div>
+        
+        <div class="testimonial-card reveal">
+            <div class="testimonial-header">
+                <div class="testimonial-avatar">JS</div>
+                <div class="testimonial-info">
+                    <h4>João Santos</h4>
+                    <p>Benguela, Angola</p>
+                </div>
+            </div>
+            <div class="testimonial-rating">
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+            </div>
+            <p class="testimonial-text">"Plataforma muito fácil de usar. Consegui contratar um canalizador em poucos minutos. O trabalho ficou perfeito!"</p>
+        </div>
+        
+        <div class="testimonial-card reveal">
+            <div class="testimonial-header">
+                <div class="testimonial-avatar">MF</div>
+                <div class="testimonial-info">
+                    <h4>Maria Fernandes</h4>
+                    <p>Huambo, Angola</p>
+                </div>
+            </div>
+            <div class="testimonial-rating">
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+                <i class="fa-solid fa-star"></i>
+            </div>
+            <p class="testimonial-text">"Excelente serviço! Os profissionais são realmente verificados e de confiança. Já usei várias vezes e sempre fiquei satisfeita."</p>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     CONTATO
+============================================ -->
+<section id="contato">
+    <h2 class="reveal">Entre em <span>Contacto</span></h2>
+    <p class="reveal">Estamos aqui para ajudar você</p>
+    
+    <div class="contact-container">
+        <div class="contact-info reveal-left">
+            <div class="contact-item">
+                <div class="contact-icon">
+                    <i class="fa-solid fa-phone"></i>
+                </div>
+                <div class="contact-details">
+                    <h3>Telefones</h3>
+                    <p>
+                        +244 993 833 333<br>
+                        +244 277 777 777
+                    </p>
+                </div>
+            </div>
+            
+            <div class="contact-item">
+                <div class="contact-icon">
+                    <i class="fa-solid fa-envelope"></i>
+                </div>
+                <div class="contact-details">
+                    <h3>Email</h3>
+                    <p>
+                        <a href="mailto:info@geoservices.ao">info@geoservices.ao</a><br>
+                        <a href="mailto:suporte@geoservices.ao">suporte@geoservices.ao</a>
+                    </p>
+                </div>
+            </div>
+            
+            <div class="contact-item">
+                <div class="contact-icon">
+                    <i class="fa-solid fa-location-dot"></i>
+                </div>
+                <div class="contact-details">
+                    <h3>Localização</h3>
+                    <p>
+                        Edifício Belas Business Park<br>
+                        Talatona, Luanda - Angola
+                    </p>
+                </div>
+            </div>
+            
+            <div class="contact-item">
+                <div class="contact-icon">
+                    <i class="fa-solid fa-clock"></i>
+                </div>
+                <div class="contact-details">
+                    <h3>Horário de Atendimento</h3>
+                    <p>
+                        Segunda a Sexta: 08:00 - 18:00<br>
+                        Sábado: 08:00 - 13:00
+                    </p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="map-wrapper reveal-right">
+            <iframe 
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3942.537890457654!2d13.190678!3d-8.8937!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1a51f15890457d5d%3A0x867015d688975390!2sBelas%20Business%20Park!5e0!3m2!1spt-PT!2sao!4v1700000000000!5m2!1spt-PT!2sao" 
+                allowfullscreen="" 
+                loading="lazy"
+                referrerpolicy="no-referrer-when-downgrade">
+            </iframe>
+        </div>
+    </div>
+</section>
+
+<!-- ============================================
+     FOOTER
+============================================ -->
+<footer>
+    <div class="footer-content">
+        <div class="footer-logo">
+            <i class="fa-solid fa-location-dot"></i>
+            Geo<span>Services</span>
+        </div>
+        
+        <p>© 2026 GeoServices – Conectando profissionais aos seus clientes</p>
+        
+        <div class="social-links">
+            <a href="#" aria-label="Facebook">
+                <i class="fa-brands fa-facebook-f"></i>
+            </a>
+            <a href="#" aria-label="Instagram">
+                <i class="fa-brands fa-instagram"></i>
+            </a>
+            <a href="#" aria-label="LinkedIn">
+                <i class="fa-brands fa-linkedin-in"></i>
+            </a>
+            <a href="#" aria-label="WhatsApp">
+                <i class="fa-brands fa-whatsapp"></i>
+            </a>
+        </div>
+    </div>
+</footer>
+
+<!-- ============================================
+     JAVASCRIPT
+============================================ -->
+<script>
+// ============================================
+// SISTEMA DE SLIDERS OTIMIZADO
+// ============================================
+const sliders = {};
+
+function initSlider(sliderId) {
+    const sliderElement = document.getElementById(sliderId);
+    if (!sliderElement) return;
+    
+    sliders[sliderId] = {
+        currentSlide: 0,
+        slides: sliderElement.querySelectorAll('.slide'),
+        dots: sliderElement.parentElement.querySelectorAll('.slider-dot'),
+        autoPlayInterval: null
+    };
+    
+    startAutoPlay(sliderId);
+}
+
+function changeSlide(sliderId, direction) {
+    const slider = sliders[sliderId];
+    if (!slider) return;
+    
+    slider.currentSlide += direction;
+    
+    if (slider.currentSlide >= slider.slides.length) {
+        slider.currentSlide = 0;
+    } else if (slider.currentSlide < 0) {
+        slider.currentSlide = slider.slides.length - 1;
+    }
+    
+    updateSlider(sliderId);
+    resetAutoPlay(sliderId);
+}
+
+function goToSlide(sliderId, index) {
+    const slider = sliders[sliderId];
+    if (!slider) return;
+    
+    slider.currentSlide = index;
+    updateSlider(sliderId);
+    resetAutoPlay(sliderId);
+}
+
+function updateSlider(sliderId) {
+    const slider = sliders[sliderId];
+    if (!slider) return;
+    
+    slider.slides.forEach((slide, index) => {
+        slide.classList.toggle('active', index === slider.currentSlide);
+    });
+    
+    slider.dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === slider.currentSlide);
+    });
+}
+
+function startAutoPlay(sliderId) {
+    const slider = sliders[sliderId];
+    if (!slider) return;
+    
+    slider.autoPlayInterval = setInterval(() => {
+        changeSlide(sliderId, 1);
+    }, 5000);
+}
+
+function resetAutoPlay(sliderId) {
+    const slider = sliders[sliderId];
+    if (!slider) return;
+    
+    clearInterval(slider.autoPlayInterval);
+    startAutoPlay(sliderId);
+}
+
+// ============================================
+// ANIMAÇÕES DE SCROLL REVEAL
+// ============================================
+function reveal() {
+    const reveals = document.querySelectorAll('.reveal, .reveal-left, .reveal-right');
+    
+    reveals.forEach(element => {
+        const windowHeight = window.innerHeight;
+        const elementTop = element.getBoundingClientRect().top;
+        const elementVisible = 150;
+        
+        if (elementTop < windowHeight - elementVisible) {
+            element.classList.add('active');
+        }
+    });
+}
+
+// ============================================
+// NAVEGAÇÃO ATIVA
+// ============================================
+function updateActiveNav() {
+    const sections = document.querySelectorAll('section[id]');
+    const navLinks = document.querySelectorAll('.nav-menu a:not(.nav-cta)');
+    
+    let current = '';
+    
+    sections.forEach(section => {
+        const sectionTop = section.offsetTop;
+        const sectionHeight = section.clientHeight;
+        
+        if (window.scrollY >= sectionTop - 200) {
+            current = section.getAttribute('id');
+        }
+    });
+    
+    navLinks.forEach(link => {
+        link.classList.remove('active');
+        if (link.getAttribute('href') === `#${current}`) {
+            link.classList.add('active');
+        }
+    });
+}
+
+// ============================================
+// HEADER SCROLL EFFECT
+// ============================================
+function handleHeaderScroll() {
+    const header = document.querySelector('header');
+    
+    if (window.scrollY > 50) {
+        header.classList.add('scrolled');
+    } else {
+        header.classList.remove('scrolled');
+    }
+}
+
+// ============================================
+// MENU MOBILE
+// ============================================
+const mobileMenuToggle = document.querySelector('.mobile-menu-toggle');
+const navMenu = document.querySelector('.nav-menu');
+
+mobileMenuToggle?.addEventListener('click', () => {
+    navMenu.classList.toggle('active');
+    const icon = mobileMenuToggle.querySelector('i');
+    
+    if (navMenu.classList.contains('active')) {
+        icon.classList.remove('fa-bars');
+        icon.classList.add('fa-times');
+    } else {
+        icon.classList.remove('fa-times');
+        icon.classList.add('fa-bars');
+    }
+});
+
+// Fechar menu ao clicar em um link
+document.querySelectorAll('.nav-menu a').forEach(link => {
+    link.addEventListener('click', () => {
+        navMenu.classList.remove('active');
+        const icon = mobileMenuToggle?.querySelector('i');
+        if (icon) {
+            icon.classList.remove('fa-times');
+            icon.classList.add('fa-bars');
+        }
+    });
+});
+
+// ============================================
+// SMOOTH SCROLL
+// ============================================
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener('click', function (e) {
+        e.preventDefault();
+        const target = document.querySelector(this.getAttribute('href'));
+        
+        if (target) {
+            const headerOffset = 80;
+            const elementPosition = target.getBoundingClientRect().top;
+            const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+            
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
+        }
+    });
+});
+
+// ============================================
+// INICIALIZAÇÃO
+// ============================================
+document.addEventListener('DOMContentLoaded', () => {
+    // Inicializar sliders
+    initSlider('heroSlider');
+    initSlider('aboutSlider');
+    
+    // Primeira verificação de reveal
+    reveal();
+    updateActiveNav();
+    handleHeaderScroll();
+});
+
+// Event listeners
+window.addEventListener('scroll', () => {
+    reveal();
+    updateActiveNav();
+    handleHeaderScroll();
+});
+
+// Performance optimization - usar requestAnimationFrame para scroll
+let ticking = false;
+window.addEventListener('scroll', () => {
+    if (!ticking) {
+        window.requestAnimationFrame(() => {
+            reveal();
+            updateActiveNav();
+            handleHeaderScroll();
+            ticking = false;
+        });
+        ticking = true;
+    }
+});
+</script>
+
+</body>
+</html>

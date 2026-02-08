@@ -1,0 +1,1981 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GeoServices - Procurando Mecânicos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', sans-serif;
+            background: #e8eaf6;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .device-container {
+            width: 100%;
+            max-width: 390px;
+            background: #ffffff;
+            border-radius: 24px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(63, 81, 181, 0.25), 0 8px 24px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+
+        @media (min-width: 768px) {
+            .device-container {
+                max-width: 768px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .device-container {
+                max-width: 1200px;
+                border-radius: 16px;
+            }
+            
+            body {
+                padding: 40px;
+                background: linear-gradient(135deg, #e8eaf6 0%, #c5cae9 100%);
+            }
+        }
+
+        .header {
+            background: linear-gradient(135deg, #3f51b5 0%, #5c6bc0 100%);
+            padding: 45px 20px 25px;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        @media (min-width: 768px) {
+            .header {
+                padding: 55px 35px 30px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .header {
+                padding: 60px 50px 35px;
+            }
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -10%;
+            width: 300px;
+            height: 300px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -20%;
+            left: -5%;
+            width: 200px;
+            height: 200px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 50%;
+            pointer-events: none;
+        }
+
+        .profile-section {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .avatar {
+            width: 50px;
+            height: 50px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: bold;
+            border: 2px solid rgba(255,255,255,0.3);
+            backdrop-filter: blur(10px);
+        }
+
+        .user-info h2 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .location {
+            font-size: 14px;
+            opacity: 0.9;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .search-status {
+            background: rgba(255,255,255,0.15);
+            margin-top: 20px;
+            padding: 15px;
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            position: relative;
+            z-index: 1;
+        }
+
+        .status-text {
+            font-size: 15px;
+            font-weight: 500;
+            margin-bottom: 8px;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: white;
+            border-radius: 2px;
+            animation: progressAnimation 3s infinite;
+        }
+
+        @keyframes progressAnimation {
+            0% { width: 0%; }
+            50% { width: 70%; }
+            100% { width: 100%; }
+        }
+
+        .map-container {
+            height: 300px;
+            position: relative;
+            background: #f8f9fa;
+        }
+
+        @media (min-width: 768px) {
+            .map-container {
+                height: 350px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .map-container {
+                height: 400px;
+            }
+        }
+
+        #map {
+            width: 100%;
+            height: 100%;
+            filter: blur(0px);
+            transition: filter 0.3s ease;
+        }
+
+        #map.blurred {
+            filter: blur(4px);
+        }
+
+        .search-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(63, 81, 181, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            backdrop-filter: blur(2px);
+            transition: opacity 0.5s;
+        }
+
+        .search-pulse {
+            width: 150px;
+            height: 150px;
+            border: 3px solid #3f51b5;
+            border-radius: 50%;
+            position: relative;
+            animation: pulse 2s infinite;
+        }
+
+        .search-pulse::before,
+        .search-pulse::after {
+            content: '';
+            position: absolute;
+            border: 2px solid rgba(63, 81, 181, 0.5);
+            border-radius: 50%;
+            top: -20px;
+            left: -20px;
+            right: -20px;
+            bottom: -20px;
+            animation: pulse 2s infinite 0.5s;
+        }
+
+        .search-pulse::after {
+            top: -40px;
+            left: -40px;
+            right: -40px;
+            bottom: -40px;
+            animation-delay: 1s;
+            border-color: rgba(63, 81, 181, 0.3);
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(0.8);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(1.2);
+                opacity: 0;
+            }
+        }
+
+        .search-icon {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .search-icon svg {
+            width: 30px;
+            height: 30px;
+            stroke: #3f51b5;
+        }
+
+        .mechanics-found {
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: none;
+            z-index: 1001;
+            animation: slideDown 0.5s ease-out;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0);
+            }
+        }
+
+        .found-indicator {
+            color: #3f51b5;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .found-indicator::before {
+            content: '✓';
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            background: #4caf50;
+            color: white;
+            border-radius: 50%;
+            font-size: 12px;
+        }
+
+        .search-info {
+            padding: 25px 20px;
+            background: #fafafa;
+        }
+
+        @media (min-width: 768px) {
+            .search-info {
+                padding: 30px 35px;
+            }
+        }
+
+        @media (min-width: 1024px) {
+            .search-info {
+                padding: 35px 50px;
+            }
+        }
+
+        .search-details {
+            margin-bottom: 25px;
+        }
+
+        .search-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #212121;
+            margin-bottom: 8px;
+        }
+
+        .search-subtitle {
+            font-size: 14px;
+            color: #757575;
+            line-height: 1.5;
+        }
+
+        .search-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .stat-item {
+            background: white;
+            padding: 18px;
+            border-radius: 14px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 24px;
+            font-weight: 700;
+            color: #3f51b5;
+            margin-bottom: 4px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #757575;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .continue-btn {
+            width: 100%;
+            background: linear-gradient(135deg, #3f51b5 0%, #5c6bc0 100%);
+            border: none;
+            color: white;
+            padding: 16px;
+            border-radius: 14px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 12px rgba(63, 81, 181, 0.3);
+            opacity: 0;
+            transform: translateY(10px);
+            pointer-events: none;
+        }
+
+        .continue-btn.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+            animation: fadeInUp 0.5s ease-out;
+        }
+
+        .continue-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(63, 81, 181, 0.4);
+        }
+
+        .continue-btn:active {
+            transform: translateY(0);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .cancel-btn {
+            width: 100%;
+            background: transparent;
+            border: 2px solid #e0e0e0;
+            color: #757575;
+            padding: 15px;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .cancel-btn:hover {
+            background: #f5f5f5;
+            border-color: #bdbdbd;
+            color: #424242;
+        }
+
+        .loading-dots::after {
+            content: '';
+            animation: dots 1.5s steps(4, end) infinite;
+        }
+
+        @keyframes dots {
+            0%, 20% { content: ''; }
+            40% { content: '.'; }
+            60% { content: '..'; }
+            80%, 100% { content: '...'; }
+        }
+
+        @keyframes bounceIn {
+            0% {
+                transform: scale(0) rotate(180deg);
+                opacity: 0;
+            }
+            50% {
+                transform: scale(1.3) rotate(0deg);
+                opacity: 0.8;
+            }
+            100% {
+                transform: scale(1) rotate(0deg);
+                opacity: 1;
+            }
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        /* CHAT INTERFACE STYLES */
+        .chat-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            backdrop-filter: blur(5px);
+            z-index: 9998;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .chat-overlay.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .chat-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 90%;
+            max-width: 420px;
+            height: 85vh;
+            max-height: 700px;
+            background: #f0f2f5;
+            border-radius: 16px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            opacity: 0;
+        }
+
+        .chat-container.active {
+            display: flex;
+            animation: slideInChat 0.4s ease forwards;
+        }
+
+        @keyframes slideInChat {
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        /* Chat Header */
+        .chat-header {
+            background: linear-gradient(135deg, #3f51b5 0%, #5c6bc0 100%);
+            color: white;
+            padding: 16px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex: 1;
+        }
+
+        .chat-back-btn {
+            background: transparent;
+            border: none;
+            color: white;
+            cursor: pointer;
+            padding: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .chat-back-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+
+        .chat-back-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .chat-header-info {
+            flex: 1;
+        }
+
+        .chat-header-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .chat-header-subtitle {
+            font-size: 12px;
+            opacity: 0.9;
+        }
+
+        /* Professionals List */
+        .professionals-list {
+            background: white;
+            border-bottom: 1px solid #e0e0e0;
+            padding: 12px 16px;
+            overflow-x: auto;
+            scrollbar-width: none;
+            display: none;
+        }
+
+        .professionals-list.show {
+            display: block;
+        }
+
+        .professionals-list::-webkit-scrollbar {
+            display: none;
+        }
+
+        .professionals-scroll {
+            display: flex;
+            gap: 12px;
+        }
+
+        .professional-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 6px;
+            padding: 8px 12px;
+            border-radius: 12px;
+            min-width: 80px;
+        }
+
+        .professional-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #3f51b5, #5c6bc0);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            position: relative;
+        }
+
+        .professional-status {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 14px;
+            height: 14px;
+            background: #4caf50;
+            border: 2px solid white;
+            border-radius: 50%;
+        }
+
+        .professional-name {
+            font-size: 12px;
+            font-weight: 500;
+            color: #212121;
+            text-align: center;
+        }
+
+        .professional-role {
+            font-size: 10px;
+            color: #757575;
+        }
+
+        /* Chat Messages Area */
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            background: #e5ddd5;
+            background-image: 
+                repeating-linear-gradient(
+                    45deg,
+                    transparent,
+                    transparent 10px,
+                    rgba(255,255,255,.03) 10px,
+                    rgba(255,255,255,.03) 20px
+                );
+        }
+
+        .chat-date-divider {
+            text-align: center;
+            margin: 20px 0;
+        }
+
+        .chat-date-text {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #757575;
+            display: inline-block;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .message {
+            display: flex;
+            margin-bottom: 12px;
+            animation: messageSlideIn 0.3s ease;
+        }
+
+        @keyframes messageSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .message.sent {
+            justify-content: flex-end;
+        }
+
+        .message-bubble {
+            max-width: 75%;
+            padding: 8px 12px;
+            border-radius: 8px;
+            position: relative;
+            word-wrap: break-word;
+        }
+
+        .message.received .message-bubble {
+            background: white;
+            border-bottom-left-radius: 2px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .message.sent .message-bubble {
+            background: #dcf8c6;
+            border-bottom-right-radius: 2px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .message-text {
+            font-size: 14px;
+            line-height: 1.5;
+            color: #212121;
+        }
+
+        .message-time {
+            font-size: 11px;
+            color: #667781;
+            margin-top: 4px;
+            text-align: right;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 4px;
+        }
+
+        .message-check {
+            color: #4fc3f7;
+            font-size: 16px;
+        }
+
+        .assistant-message {
+            background: #fff9c4;
+            border-left: 4px solid #fbc02d;
+        }
+
+        .assistant-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: #fbc02d;
+            color: #000;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        /* Price Negotiation */
+        .price-negotiation {
+            background: white;
+            border-radius: 12px;
+            padding: 16px;
+            margin: 16px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .price-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+
+        .price-label {
+            font-size: 13px;
+            color: #757575;
+            font-weight: 500;
+        }
+
+        .price-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #3f51b5;
+            text-align: center;
+            margin: 12px 0;
+        }
+
+        .price-slider-container {
+            margin: 16px 0;
+        }
+
+        .price-range {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #9e9e9e;
+            margin-bottom: 8px;
+        }
+
+        .price-slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #e0e0e0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .price-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #3f51b5;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(63, 81, 181, 0.4);
+        }
+
+        .price-slider::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #3f51b5;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 6px rgba(63, 81, 181, 0.4);
+        }
+
+        .price-buttons {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .price-btn {
+            flex: 1;
+            padding: 10px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .price-btn-decline {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .price-btn-decline:hover {
+            background: #ffcdd2;
+        }
+
+        .price-btn-accept {
+            background: #3f51b5;
+            color: white;
+        }
+
+        .price-btn-accept:hover {
+            background: #5c6bc0;
+        }
+
+        /* Chat Input */
+        .chat-input-container {
+            background: #f0f2f5;
+            padding: 12px 16px;
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+        }
+
+        .chat-input-wrapper {
+            flex: 1;
+            background: white;
+            border-radius: 24px;
+            display: flex;
+            align-items: center;
+            padding: 8px 16px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 15px;
+            font-family: inherit;
+            resize: none;
+            max-height: 100px;
+            line-height: 1.5;
+        }
+
+        .attach-btn {
+            background: transparent;
+            border: none;
+            color: #8696a0;
+            cursor: pointer;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: color 0.2s;
+            margin-right: 8px;
+        }
+
+        .attach-btn:hover {
+            color: #3f51b5;
+        }
+
+        .attach-btn svg {
+            width: 24px;
+            height: 24px;
+        }
+
+        .send-btn {
+            background: #3f51b5;
+            border: none;
+            color: white;
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            box-shadow: 0 2px 8px rgba(63, 81, 181, 0.3);
+        }
+
+        .send-btn:hover {
+            background: #5c6bc0;
+            transform: scale(1.05);
+        }
+
+        .send-btn:active {
+            transform: scale(0.95);
+        }
+
+        .send-btn svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Typing Indicator */
+        .typing-indicator {
+            display: none;
+            padding: 8px 12px;
+            background: white;
+            border-radius: 8px;
+            border-bottom-left-radius: 2px;
+            max-width: 75px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .typing-indicator.active {
+            display: block;
+        }
+
+        .typing-dots {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            background: #b0b3b8;
+            border-radius: 50%;
+            animation: typingBounce 1.4s infinite;
+        }
+
+        .typing-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .typing-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        @keyframes typingBounce {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-8px);
+            }
+        }
+
+        /* CONFIRMATION INTERFACE */
+        .confirmation-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(8px);
+            z-index: 10000;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .confirmation-overlay.active {
+            display: block;
+        }
+
+        .confirmation-container {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.9);
+            width: 90%;
+            max-width: 420px;
+            height: 85vh;
+            max-height: 700px;
+            background: #f5f7fa;
+            border-radius: 16px;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4);
+            z-index: 10001;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            opacity: 0;
+        }
+
+        .confirmation-container.active {
+            display: flex;
+            animation: slideInConfirmation 0.5s ease forwards;
+        }
+
+        @keyframes slideInConfirmation {
+            to {
+                opacity: 1;
+                transform: translate(-50%, -50%) scale(1);
+            }
+        }
+
+        /* Confirmation Header */
+        .confirmation-header {
+            background: linear-gradient(135deg, #3f51b5 0%, #5c6bc0 100%);
+            padding: 50px 24px 30px;
+            color: white;
+            text-align: center;
+            position: relative;
+        }
+
+        .success-icon {
+            width: 70px;
+            height: 70px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 16px;
+            backdrop-filter: blur(10px);
+            animation: successPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes successPulse {
+            0%, 100% {
+                transform: scale(1);
+                box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.4);
+            }
+            50% {
+                transform: scale(1.05);
+                box-shadow: 0 0 0 20px rgba(255, 255, 255, 0);
+            }
+        }
+
+        .success-icon svg {
+            width: 40px;
+            height: 40px;
+            stroke: white;
+            stroke-width: 3;
+        }
+
+        .confirmation-header h1 {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .confirmation-header .subtitle {
+            font-size: 15px;
+            opacity: 0.95;
+        }
+
+        /* Confirmation Content */
+        .confirmation-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .confirmation-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            animation: slideUpFade 0.6s ease forwards;
+        }
+
+        @keyframes slideUpFade {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .mechanic-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 20px;
+        }
+
+        .mechanic-avatar-large {
+            width: 70px;
+            height: 70px;
+            background: linear-gradient(135deg, #3f51b5, #5c6bc0);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 28px;
+            font-weight: bold;
+            box-shadow: 0 4px 12px rgba(63, 81, 181, 0.3);
+        }
+
+        .mechanic-details h2 {
+            font-size: 20px;
+            font-weight: 700;
+            color: #212121;
+            margin-bottom: 6px;
+        }
+
+        .mechanic-rating {
+            font-size: 14px;
+            color: #757575;
+            margin-bottom: 4px;
+        }
+
+        .mechanic-specialty {
+            font-size: 13px;
+            color: #3f51b5;
+            font-weight: 500;
+        }
+
+        .price-confirmed {
+            background: linear-gradient(135deg, #e8eaf6, #c5cae9);
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .price-confirmed-label {
+            font-size: 13px;
+            color: #5c6bc0;
+            font-weight: 600;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .price-confirmed-amount {
+            font-size: 32px;
+            font-weight: 700;
+            color: #3f51b5;
+        }
+
+        .eta-info {
+            background: #f5f7fa;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .eta-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #212121;
+            margin-bottom: 12px;
+        }
+
+        .countdown-display {
+            font-size: 48px;
+            font-weight: 700;
+            color: #3f51b5;
+            margin-bottom: 8px;
+        }
+
+        .countdown-label {
+            font-size: 14px;
+            color: #757575;
+        }
+
+        .status-timeline {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+            animation: slideUpFade 0.8s ease forwards;
+            animation-delay: 0.2s;
+            opacity: 0;
+        }
+
+        .timeline-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #212121;
+            margin-bottom: 20px;
+        }
+
+        .timeline-items {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 10px;
+            background: #f9fafb;
+            transition: all 0.3s;
+        }
+
+        .timeline-item.active {
+            background: #e8eaf6;
+        }
+
+        .timeline-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #e0e0e0;
+            font-size: 18px;
+            transition: all 0.3s;
+        }
+
+        .timeline-item.active .timeline-icon {
+            background: #3f51b5;
+            color: white;
+        }
+
+        .timeline-text {
+            flex: 1;
+        }
+
+        .timeline-text-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #212121;
+            margin-bottom: 2px;
+        }
+
+        .timeline-text-desc {
+            font-size: 12px;
+            color: #757575;
+        }
+
+        .action-buttons-confirm {
+            padding: 16px 24px 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: white;
+            border-top: 1px solid #e0e0e0;
+        }
+
+        .contact-btn {
+            padding: 14px;
+            border-radius: 12px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .call-btn {
+            background: #3f51b5;
+            color: white;
+            border: none;
+        }
+
+        .call-btn:hover {
+            background: #5c6bc0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(63, 81, 181, 0.3);
+        }
+
+        .message-btn {
+            background: white;
+            color: #3f51b5;
+            border: 2px solid #3f51b5;
+        }
+
+        .message-btn:hover {
+            background: #e8eaf6;
+        }
+    </style>
+</head>
+<body>
+    <div class="device-container">
+        <div class="header">
+            <div class="profile-section">
+                <div class="avatar">C</div>
+                <div class="user-info">
+                    <h2>Catilândia Evaristo</h2>
+                    <div class="location">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/>
+                            <circle cx="12" cy="10" r="3"/>
+                        </svg>
+                        Luanda, Angola
+                    </div>
+                </div>
+            </div>
+
+            <div class="search-status">
+                <div class="status-text">Procurando serviços próximos<span class="loading-dots"></span></div>
+                <div class="progress-bar">
+                    <div class="progress-fill"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="map-container">
+            <div id="map"></div>
+            <div class="search-overlay" id="searchOverlay">
+                <div class="search-pulse">
+                    <div class="search-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <path d="m21 21-4.35-4.35"/>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+            <div class="mechanics-found" id="mechanicsFound">
+                <span class="found-indicator">3 mecânicos encontrados</span>
+            </div>
+        </div>
+
+        <div class="search-info">
+            <div class="search-details">
+                <h3 class="search-title">Buscando Mecânicos</h3>
+                <p class="search-subtitle">Analisando profissionais qualificados na sua região com base na sua localização atual</p>
+            </div>
+
+            <div class="search-stats">
+                <div class="stat-item">
+                    <span class="stat-number" id="radiusCounter">2.5</span>
+                    <span class="stat-label">km raio</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="mechanicsCounter">0</span>
+                    <span class="stat-label">encontrados</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-number" id="timeCounter">0</span>
+                    <span class="stat-label">segundos</span>
+                </div>
+            </div>
+
+            <div class="action-buttons">
+                <button class="continue-btn" id="continueBtn" onclick="openChat()">
+                    Continuar
+                </button>
+                <button class="cancel-btn" onclick="cancelSearch()">
+                    Cancelar Busca
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chat Interface -->
+    <div class="chat-overlay" id="chatOverlay"></div>
+    <div class="chat-container" id="chatContainer">
+        <div class="chat-header">
+            <div class="chat-header-left">
+                <button class="chat-back-btn" onclick="closeChat()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M19 12H5M12 19l-7-7 7-7"/>
+                    </svg>
+                </button>
+                <div class="chat-header-info">
+                    <div class="chat-header-title">Atendimento GeoServices</div>
+                    <div class="chat-header-subtitle">Assistente Virtual</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="professionals-list" id="professionalsList">
+            <div class="professionals-scroll">
+                <div class="professional-item">
+                    <div class="professional-avatar">
+                        F
+                        <div class="professional-status"></div>
+                    </div>
+                    <div class="professional-name">Fernando Silva</div>
+                    <div class="professional-role">Mecânico</div>
+                </div>
+                <div class="professional-item">
+                    <div class="professional-avatar">
+                        N
+                        <div class="professional-status"></div>
+                    </div>
+                    <div class="professional-name">Nuno Pereira</div>
+                    <div class="professional-role">Mecânico</div>
+                </div>
+                <div class="professional-item">
+                    <div class="professional-avatar">
+                        A
+                        <div class="professional-status"></div>
+                    </div>
+                    <div class="professional-name">António Costa</div>
+                    <div class="professional-role">Mecânico</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+            <div class="chat-date-divider">
+                <span class="chat-date-text">Hoje</span>
+            </div>
+
+            <div class="message received">
+                <div class="message-bubble">
+                    <div class="message-text">Olá! Bem-vindo ao atendimento GeoServices. Por favor, descreva o problema do seu veículo para que possamos conectá-lo aos mecânicos disponíveis.</div>
+                    <div class="message-time">14:32</div>
+                </div>
+            </div>
+
+            <div class="typing-indicator" id="typingIndicator">
+                <div class="typing-dots">
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                    <div class="typing-dot"></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="chat-input-container">
+            <div class="chat-input-wrapper">
+                <button class="attach-btn">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/>
+                    </svg>
+                </button>
+                <textarea class="chat-input" id="chatInput" placeholder="Descreva o problema do seu veículo..." rows="1"></textarea>
+            </div>
+            <button class="send-btn" onclick="sendMessage()">
+                <svg viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
+                </svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- Confirmation Interface -->
+    <div class="confirmation-overlay" id="confirmationOverlay"></div>
+    <div class="confirmation-container" id="confirmationContainer">
+        <div class="confirmation-header">
+            <div class="success-icon">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M20 6L9 17l-5-5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+            </div>
+            <h1>Serviço Confirmado</h1>
+            <p class="subtitle">Seu atendimento está em andamento</p>
+        </div>
+
+        <div class="confirmation-content">
+            <div class="confirmation-card">
+                <div class="mechanic-info">
+                    <div class="mechanic-avatar-large" id="selectedMechanicAvatar">N</div>
+                    <div class="mechanic-details">
+                        <h2 id="selectedMechanicName">Nuno Pereira</h2>
+                        <div class="mechanic-rating">⭐ 4.8 (156 avaliações)</div>
+                        <div class="mechanic-specialty">Especialista em Diagnóstico</div>
+                    </div>
+                </div>
+
+                <div class="price-confirmed">
+                    <div class="price-confirmed-label">Valor Acordado</div>
+                    <div class="price-confirmed-amount" id="confirmedPrice">5.000 AOA</div>
+                </div>
+
+                <div class="eta-info">
+                    <div class="eta-title">Tempo Estimado de Chegada</div>
+                    <div class="countdown-display" id="countdownMinutes">10</div>
+                    <div class="countdown-label">minutos restantes</div>
+                </div>
+            </div>
+
+            <div class="status-timeline">
+                <div class="timeline-title">Acompanhe o Status</div>
+                <div class="timeline-items">
+                    <div class="timeline-item active">
+                        <div class="timeline-icon">✓</div>
+                        <div class="timeline-text">
+                            <div class="timeline-text-title">Solicitação Aceita</div>
+                            <div class="timeline-text-desc">Mecânico confirmou o atendimento</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item active">
+                        <div class="timeline-icon">🚗</div>
+                        <div class="timeline-text">
+                            <div class="timeline-text-title">A Caminho</div>
+                            <div class="timeline-text-desc">Profissional está se deslocando</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon">🔧</div>
+                        <div class="timeline-text">
+                            <div class="timeline-text-title">Em Atendimento</div>
+                            <div class="timeline-text-desc">Serviço sendo realizado</div>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-icon">✓</div>
+                        <div class="timeline-text">
+                            <div class="timeline-text-title">Concluído</div>
+                            <div class="timeline-text-desc">Serviço finalizado com sucesso</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="action-buttons-confirm">
+            <button class="contact-btn call-btn" onclick="callMechanic()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/>
+                </svg>
+                Ligar para o Mecânico
+            </button>
+            <button class="contact-btn message-btn" onclick="messageMechanic()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                </svg>
+                Enviar Mensagem
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let map;
+        let searchComplete = false;
+        let timeElapsed = 0;
+        let currentPrice = 2500;
+        let messageCount = 0;
+        let countdown = 600; // 10 minutos
+
+        const professionals = [
+            { name: 'Fernando Silva', initial: 'F', rating: '4.9 (187 avaliações)', specialty: 'Especialista em Motor' },
+            { name: 'Nuno Pereira', initial: 'N', rating: '4.8 (156 avaliações)', specialty: 'Especialista em Diagnóstico' },
+            { name: 'António Costa', initial: 'A', rating: '4.7 (142 avaliações)', specialty: 'Especialista em Elétrica' }
+        ];
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeMap();
+            startSearchAnimation();
+            setupChatInput();
+        });
+
+        function initializeMap() {
+            const luandaCoords = [-8.8390, 13.2894];
+            
+            map = L.map('map', {
+                zoomControl: false,
+                attributionControl: false
+            }).setView(luandaCoords, 13);
+
+            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
+
+            const userIcon = L.divIcon({
+                html: '<div style="background: #3f51b5; width: 16px; height: 16px; border-radius: 50%; border: 3px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3);"></div>',
+                className: 'custom-marker',
+                iconSize: [16, 16],
+                iconAnchor: [8, 8]
+            });
+
+            L.marker(luandaCoords, {icon: userIcon}).addTo(map);
+
+            const searchRadius = L.circle(luandaCoords, {
+                radius: 2500,
+                fillColor: '#3f51b5',
+                color: '#3f51b5',
+                weight: 2,
+                opacity: 0.3,
+                fillOpacity: 0.1
+            }).addTo(map);
+
+            map.dragging.disable();
+            map.touchZoom.disable();
+            map.doubleClickZoom.disable();
+            map.scrollWheelZoom.disable();
+        }
+
+        function startSearchAnimation() {
+            const timer = setInterval(() => {
+                timeElapsed++;
+                document.getElementById('timeCounter').textContent = timeElapsed;
+            }, 1000);
+
+            setTimeout(() => {
+                updateMechanicsCounter(1);
+                addMechanicToMap([-8.8290, 13.2794], 'F');
+            }, 2000);
+
+            setTimeout(() => {
+                updateMechanicsCounter(2);
+                addMechanicToMap([-8.8490, 13.3000], 'N');
+            }, 3500);
+
+            setTimeout(() => {
+                updateMechanicsCounter(3);
+                addMechanicToMap([-8.8200, 13.3100], 'A');
+                completeSearch(timer);
+            }, 5000);
+        }
+
+        function updateMechanicsCounter(count) {
+            document.getElementById('mechanicsCounter').textContent = count;
+            
+            const counter = document.getElementById('mechanicsCounter');
+            counter.style.animation = 'none';
+            setTimeout(() => {
+                counter.style.animation = 'bounce 0.6s ease-in-out';
+            }, 10);
+        }
+
+        function addMechanicToMap(coords, initial) {
+            const mechanicIcon = L.divIcon({
+                html: `<div style="background: linear-gradient(135deg, #3f51b5, #5c6bc0); width: 24px; height: 24px; border-radius: 50%; border: 2px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.3); display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; font-size: 10px; animation: bounceIn 0.6s ease-out;">${initial}</div>`,
+                className: 'custom-marker',
+                iconSize: [24, 24],
+                iconAnchor: [12, 12]
+            });
+
+            L.marker(coords, {icon: mechanicIcon}).addTo(map);
+        }
+
+        function completeSearch(timer) {
+            clearInterval(timer);
+            searchComplete = true;
+
+            document.getElementById('searchOverlay').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('searchOverlay').style.display = 'none';
+                document.getElementById('mechanicsFound').style.display = 'block';
+            }, 500);
+
+            document.querySelector('.status-text').innerHTML = 'Busca concluída com sucesso';
+            document.querySelector('.progress-fill').style.width = '100%';
+            document.querySelector('.progress-fill').style.animation = 'none';
+
+            map.dragging.enable();
+            map.touchZoom.enable();
+            map.doubleClickZoom.enable();
+            map.scrollWheelZoom.enable();
+
+            document.getElementById('continueBtn').classList.add('show');
+        }
+
+        function cancelSearch() {
+            if (searchComplete) {
+                alert('Busca já foi concluída. Use o botão Continuar.');
+            } else {
+                console.log('Search cancelled');
+                alert('Busca cancelada. Retornando à tela inicial...');
+            }
+        }
+
+        function openChat() {
+            document.getElementById('chatOverlay').classList.add('active');
+            document.getElementById('chatContainer').classList.add('active');
+            document.getElementById('map').classList.add('blurred');
+            
+            const messagesContainer = document.getElementById('chatMessages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function closeChat() {
+            document.getElementById('chatOverlay').classList.remove('active');
+            document.getElementById('chatContainer').classList.remove('active');
+            document.getElementById('map').classList.remove('blurred');
+        }
+
+        function setupChatInput() {
+            const input = document.getElementById('chatInput');
+            
+            input.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+            });
+
+            input.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+        }
+
+        function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const messageText = input.value.trim();
+
+            if (messageText === '') return;
+
+            messageCount++;
+            addMessage(messageText, 'sent');
+            
+            input.value = '';
+            input.style.height = 'auto';
+
+            if (messageCount === 1) {
+                setTimeout(() => {
+                    document.getElementById('professionalsList').classList.add('show');
+                }, 500);
+
+                showTypingIndicator();
+                setTimeout(() => {
+                    hideTypingIndicator();
+                    addAssistantMessage('Obrigado pela descrição! Analisamos o problema reportado e os mecânicos disponíveis solicitam um ajuste no valor devido à complexidade do diagnóstico e possível necessidade de substituição de peças. Por favor, ajuste o valor abaixo para prosseguir com o atendimento.');
+                    
+                    setTimeout(() => {
+                        showPriceNegotiation();
+                    }, 1000);
+                }, 2000);
+            }
+        }
+
+        function addMessage(text, type) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const typingIndicator = document.getElementById('typingIndicator');
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble';
+            
+            const messageText = document.createElement('div');
+            messageText.className = 'message-text';
+            messageText.textContent = text;
+            
+            const messageTime = document.createElement('div');
+            messageTime.className = 'message-time';
+            messageTime.innerHTML = type === 'sent' 
+                ? `${getCurrentTime()} <span class="message-check">✓✓</span>`
+                : getCurrentTime();
+            
+            bubble.appendChild(messageText);
+            bubble.appendChild(messageTime);
+            messageDiv.appendChild(bubble);
+            
+            messagesContainer.insertBefore(messageDiv, typingIndicator);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function addAssistantMessage(text) {
+            const messagesContainer = document.getElementById('chatMessages');
+            const typingIndicator = document.getElementById('typingIndicator');
+            
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message received';
+            
+            const bubble = document.createElement('div');
+            bubble.className = 'message-bubble assistant-message';
+            
+            const badge = document.createElement('div');
+            badge.className = 'assistant-badge';
+            badge.innerHTML = '🤖 Assistente Virtual';
+            
+            const messageText = document.createElement('div');
+            messageText.className = 'message-text';
+            messageText.textContent = text;
+            
+            const messageTime = document.createElement('div');
+            messageTime.className = 'message-time';
+            messageTime.textContent = getCurrentTime();
+            
+            bubble.appendChild(badge);
+            bubble.appendChild(messageText);
+            bubble.appendChild(messageTime);
+            messageDiv.appendChild(bubble);
+            
+            messagesContainer.insertBefore(messageDiv, typingIndicator);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function showTypingIndicator() {
+            document.getElementById('typingIndicator').classList.add('active');
+            const messagesContainer = document.getElementById('chatMessages');
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function hideTypingIndicator() {
+            document.getElementById('typingIndicator').classList.remove('active');
+        }
+
+        function getCurrentTime() {
+            const now = new Date();
+            return `${now.getHours().toString().padStart(2, '0')}:${now.getMinutes().toString().padStart(2, '0')}`;
+        }
+
+        function showPriceNegotiation() {
+            const messagesContainer = document.getElementById('chatMessages');
+            const typingIndicator = document.getElementById('typingIndicator');
+            
+            const negotiationDiv = document.createElement('div');
+            negotiationDiv.className = 'price-negotiation';
+            negotiationDiv.innerHTML = `
+                <div class="price-header">
+                    <span class="price-label">Ajuste de Valor</span>
+                </div>
+                <div class="price-value" id="priceValue">${formatPrice(currentPrice)} AOA</div>
+                <div class="price-slider-container">
+                    <div class="price-range">
+                        <span>2.500 AOA</span>
+                        <span>10.000 AOA</span>
+                    </div>
+                    <input type="range" class="price-slider" id="priceSlider" 
+                           min="2500" max="10000" step="100" value="${currentPrice}"
+                           oninput="updatePrice(this.value)">
+                </div>
+                <div class="price-buttons">
+                    <button class="price-btn price-btn-decline" onclick="declinePrice()">Recusar</button>
+                    <button class="price-btn price-btn-accept" onclick="acceptPrice()">Aceitar Valor</button>
+                </div>
+            `;
+            
+            messagesContainer.insertBefore(negotiationDiv, typingIndicator);
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        }
+
+        function updatePrice(value) {
+            currentPrice = parseInt(value);
+            document.getElementById('priceValue').textContent = formatPrice(currentPrice) + ' AOA';
+        }
+
+        function formatPrice(price) {
+            return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        }
+
+        function declinePrice() {
+            addMessage('Obrigado, mas vou procurar outras opções.', 'sent');
+            setTimeout(() => {
+                showTypingIndicator();
+                setTimeout(() => {
+                    hideTypingIndicator();
+                    addAssistantMessage('Sem problema! Agradecemos o seu contato. Estamos à disposição caso precise de nossos serviços no futuro. Boa sorte!');
+                }, 1500);
+            }, 500);
+        }
+
+        function acceptPrice() {
+            addMessage(`Aceito o valor de ${formatPrice(currentPrice)} AOA para o serviço.`, 'sent');
+            
+            setTimeout(() => {
+                showTypingIndicator();
+                setTimeout(() => {
+                    hideTypingIndicator();
+                    addAssistantMessage(`Perfeito! Valor de ${formatPrice(currentPrice)} AOA confirmado. Conectando você com o mecânico selecionado...`);
+                    
+                    setTimeout(() => {
+                        openConfirmation();
+                    }, 5000);
+                }, 1500);
+            }, 500);
+        }
+
+        function openConfirmation() {
+            // Selecionar mecânico aleatório
+            const selectedMechanic = professionals[Math.floor(Math.random() * professionals.length)];
+            
+            // Atualizar informações do mecânico
+            document.getElementById('selectedMechanicAvatar').textContent = selectedMechanic.initial;
+            document.getElementById('selectedMechanicName').textContent = selectedMechanic.name;
+            
+            // Atualizar preço confirmado
+            document.getElementById('confirmedPrice').textContent = formatPrice(currentPrice) + ' AOA';
+            
+            // Fechar chat
+            closeChat();
+            
+            // Abrir confirmação
+            setTimeout(() => {
+                document.getElementById('confirmationOverlay').classList.add('active');
+                document.getElementById('confirmationContainer').classList.add('active');
+                
+                // Iniciar contagem regressiva
+                startCountdown();
+            }, 300);
+        }
+
+        function startCountdown() {
+            const countdownDisplay = document.getElementById('countdownMinutes');
+            
+            const interval = setInterval(() => {
+                const minutes = Math.floor(countdown / 60);
+                
+                countdownDisplay.textContent = minutes;
+                countdown--;
+                
+                if (countdown < 0) {
+                    clearInterval(interval);
+                    countdownDisplay.textContent = '0';
+                    updateTimelineStatus(2); // Mecânico chegou
+                }
+            }, 1000);
+        }
+
+        function updateTimelineStatus(activeIndex) {
+            const items = document.querySelectorAll('.timeline-item');
+            items.forEach((item, index) => {
+                if (index <= activeIndex) {
+                    item.classList.add('active');
+                }
+            });
+        }
+
+        function callMechanic() {
+            alert('Ligando para o mecânico...\n📱 +244 923 456 789');
+        }
+
+        function messageMechanic() {
+            alert('Abrindo chat com o mecânico...');
+        }
+
+        document.getElementById('chatOverlay').addEventListener('click', closeChat);
+    </script>
+</body>
+</html>
